@@ -1,0 +1,1 @@
+Hello, today i'm starting variable project

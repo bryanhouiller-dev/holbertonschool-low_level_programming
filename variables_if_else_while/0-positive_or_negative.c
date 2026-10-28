@@ -4,7 +4,7 @@ int main (void)
 {
     int n;
 
-    n = 0;
+    n = 13;
 
     if (n > 0)
     {   
