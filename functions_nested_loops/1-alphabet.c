@@ -2,17 +2,16 @@
 
 /**
  * print_alphabet - Prints the alphabet in lowercase, followed by a new line.
+ *
+ * Return: void
  */
 void print_alphabet(void)
 {
-    char ch;
+	char ch;
 
-    /* 1ère utilisation de _putchar : dans la boucle pour imprimer de 'a' à 'z' */
-    for (ch = 'a'; ch <= 'z'; ch++)
-    {
-        _putchar(ch);
-    }
-
-    /* 2ème utilisation de _putchar : pour le saut de ligne */
-    _putchar('\n');
+	for (ch = 'a'; ch <= 'z'; ch++)
+	{
+		_putchar(ch);
+	}
+	_putchar('\n');
 }
