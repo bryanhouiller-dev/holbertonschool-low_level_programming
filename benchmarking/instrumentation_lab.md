@@ -1,0 +1,14 @@
+TOTAL seconds: 0.000811
+BUILD_DATA seconds: 0.000386
+PROCESS seconds: 0.000285
+REDUCE seconds: 0.000129
+
+TOTAL seconds: 0.001177
+BUILD_DATA seconds: 0.000556
+PROCESS seconds: 0.000473
+REDUCE seconds: 0.000131
+
+TOTAL seconds: 0.001068
+BUILD_DATA seconds: 0.000653
+PROCESS seconds: 0.000277
+REDUCE seconds: 0.000127
