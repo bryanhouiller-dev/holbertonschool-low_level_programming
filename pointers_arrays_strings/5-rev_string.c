@@ -18,8 +18,8 @@ void rev_string(char *s)
 		len++;
 	}
 
-	/* Étape 2 : Échanger les caractères du début et de la fin jusqu'au milieu */
-	len--; /* On se positionne sur le dernier vrai caractère (avant le '\0') */
+	/* Étape 2 : Échanger les caractères début et fin */
+	len--;
 	while (i < len)
 	{
 		tmp = s[i];
