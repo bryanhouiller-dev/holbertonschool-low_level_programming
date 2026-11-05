@@ -1,14 +1,17 @@
+Green Efficiency Analysis
 Measurement Methodology
-Using clock() to track execution time in seconds.
+Three C programs were used to compare execution time for different workloads and algorithm structures. Each program uses the standard C headers stdio.h and time.h. The stdio.h header provides printf() for displaying the results, while time.h provides clock_t, clock(), and CLOCKS_PER_SEC for measuring processor time. No external energy-measurement library or third-party timing library was used.
 
+In the first program, a loop performs 100,000,000 iterations and adds i % 3 to a volatile unsigned long long variable. The volatile qualifier makes the result observable to the compiler and helps prevent the loop's work from being removed as an unused calculation. The measured execution times were 0.314845, 0.322351, and 0.219402 seconds.
+
+The second program initializes an array of 50,000 integers and measures two functions separately. The naive function uses nested loops; the single-pass function checks each array element once. The third program creates a deterministic dataset of 50,000 values using seed 42, then measures dataset construction, processing, and checksum reduction independently, as well as the total execution time. Each reported set contains three runs.
 Observed Performance Differences
-Naive took ~0.57s, while single-pass took ~0.00002s.
+The first program's three measurements range from 0.219402 to 0.322351 seconds. Their average is approximately 0.285533 seconds. The variation between runs shows that a single timing result should not be treated as a perfectly stable benchmark.
 
+The second program shows a much larger difference between its two functions. The naive function took 0.571526, 0.578410, and 1.102735 seconds. The single-pass function took 0.000018, 0.000028, and 0.000023 seconds. The naive measurements therefore range from about 0.57 to 1.10 seconds, while the single-pass measurements are all below 0.00003 seconds. The naive function's output was 625025000, whereas the single-pass function's output was 25000. These results are not equal because the naive implementation increments the count repeatedly while revisiting earlier array elements; it does not calculate the same count in the same way as the single-pass implementation.
 Relation Between Runtime and Energy Consumption
-Longer runtimes increase CPU work and energy draw.
-
+The measurements directly record execution time, not electrical energy. They therefore cannot establish how many joules or watts each program used. A shorter runtime can reduce the time during which a processor is active, but energy also depends on processor power, hardware behavior, compiler settings, and other system activity. Since no power meter or energy-monitoring tool was used, any claim that one version consumed a measured amount of energy would be unsupported. Runtime is useful here as a performance indicator, but it is not an energy measurement.
 Limitations of the Experiment
-OS background tasks cause timing jitter.
-
+The tests were run only three times per program, and the results vary between runs. The timing method uses clock(), which measures processor time rather than wall-clock time; very short operations, such as the single-pass function, are close to the timer's practical measurement limits. The report does not record the processor model, operating-system load, compiler version, optimization flags, or power consumption. In addition, the two counting functions produce different results because their loop logic differs, so their timings compare the implementations but do not demonstrate equivalent calculations.
 Practical Engineering Takeaway
-Optimizing code saves energy and improves green efficiency.
+The clearest result is that algorithm design strongly affects runtime. On the 50,000-element array, the nested-loop implementation repeatedly examines earlier elements, while the single-pass implementation visits each element once. The recorded times show that the single-pass version is substantially faster, although its result should be checked against the intended counting requirement before treating it as a correct replacement. The dataset test also shows why measuring separate stages is useful: across the three runs, BUILD_DATA took 0.000386–0.000653 seconds, PROCESS took 0.000277–0.000473 seconds, and REDUCE took 0.000127–0.000131 seconds. Engineers should first choose an algorithm that performs the required work correctly, then benchmark it under documented conditions. To evaluate green efficiency properly, execution-time tests should be complemented by direct energy measurements using suitable hardware or validated power-monitoring tools.
