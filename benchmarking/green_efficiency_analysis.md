@@ -1,17 +1,76 @@
-Green Efficiency Analysis
 Measurement Methodology
-Three C programs were used to compare execution time for different workloads and algorithm structures. Each program uses the standard C headers stdio.h and time.h. The stdio.h header provides printf() for displaying the results, while time.h provides clock_t, clock(), and CLOCKS_PER_SEC for measuring processor time. No external energy-measurement library or third-party timing library was used.
+Three C programs were executed to examine runtime and the effect of
+different code structures. Each program was run three times, and the
+execution times printed by the programs were recorded. The programs use
+the C clock() function: elapsed CPU time is calculated by dividing the
+difference between the ending and starting clock values by
+CLOCKS_PER_SEC.
 
-In the first program, a loop performs 100,000,000 iterations and adds i % 3 to a volatile unsigned long long variable. The volatile qualifier makes the result observable to the compiler and helps prevent the loop's work from being removed as an unused calculation. The measured execution times were 0.314845, 0.322351, and 0.219402 seconds.
+For the baseline program, the same loop was executed for 100,000,000
+iterations in every run. The measured times were 0.314845 s, 0.322351 s,
+and 0.219402 s. Their average was approximately 0.285533 s.
 
-The second program initializes an array of 50,000 integers and measures two functions separately. The naive function uses nested loops; the single-pass function checks each array element once. The third program creates a deterministic dataset of 50,000 values using seed 42, then measures dataset construction, processing, and checksum reduction independently, as well as the total execution time. Each reported set contains three runs.
+For the algorithm comparison, the array contained 50,000 integers
+initialized with their index values. The naive and single-pass functions
+were timed separately. The naive times were 0.571526 s, 0.578410 s, and
+1.102735 s, giving an average of approximately 0.750890 s. The
+single-pass times were 0.000018 s, 0.000028 s, and 0.000023 s, giving an
+average of approximately 0.000023 s.
+
+For the instrumented program, the dataset contained 50,000 values. The
+program measured dataset construction, processing, checksum reduction,
+and total runtime separately. Each experiment was repeated three times.
+Averages are used below to make the three observations easier to
+compare.
 Observed Performance Differences
-The first program's three measurements range from 0.219402 to 0.322351 seconds. Their average is approximately 0.285533 seconds. The variation between runs shows that a single timing result should not be treated as a perfectly stable benchmark.
+The baseline results show some variation between runs: the fastest was
+0.219402 s and the slowest was 0.322351 s. Nevertheless, all three runs
+performed the same 100,000,000-iteration workload.
 
-The second program shows a much larger difference between its two functions. The naive function took 0.571526, 0.578410, and 1.102735 seconds. The single-pass function took 0.000018, 0.000028, and 0.000023 seconds. The naive measurements therefore range from about 0.57 to 1.10 seconds, while the single-pass measurements are all below 0.00003 seconds. The naive function's output was 625025000, whereas the single-pass function's output was 25000. These results are not equal because the naive implementation increments the count repeatedly while revisiting earlier array elements; it does not calculate the same count in the same way as the single-pass implementation.
+The largest measured difference appeared in the algorithm comparison.
+The naive implementation took between 0.571526 s and 1.102735 s, while
+the single-pass implementation took between 0.000018 s and 0.000028 s.
+The naive function has nested loops: for each index i, it scans all
+elements from index zero through i. This repeats work on earlier array
+elements. The single-pass function visits each of the 50,000 elements
+only once. This difference in the number of operations explains the much
+longer measured runtime of the nested-loop version.
+
+An important correctness detail must also be reported: the outputs were
+not equal. The naive function returned 625025000, whereas the
+single-pass function returned 25000. The single-pass result is the
+number of even values in the array. The naive function adds the even
+values found in every prefix, so it counts many elements repeatedly.
+Therefore, these timings demonstrate the cost of repeated work, but the
+two functions do not currently solve the same counting task and are not
+a fully equivalent performance comparison.
 Relation Between Runtime and Energy Consumption
-The measurements directly record execution time, not electrical energy. They therefore cannot establish how many joules or watts each program used. A shorter runtime can reduce the time during which a processor is active, but energy also depends on processor power, hardware behavior, compiler settings, and other system activity. Since no power meter or energy-monitoring tool was used, any claim that one version consumed a measured amount of energy would be unsupported. Runtime is useful here as a performance indicator, but it is not an energy measurement.
+Energy consumption was not measured directly in these experiments.
+Runtime can only be used as an indirect indicator: a longer execution
+generally means the processor remains active for more time, which may
+increase energy use. The naive function's average runtime of about
+0.750890 s was much longer than the single-pass average of about
+0.000023 s. This suggests a potential energy-efficiency advantage for
+avoiding repeated operations. However, these measurements do not provide
+power in watts or energy in joules, so no exact energy saving can be
+claimed.
 Limitations of the Experiment
-The tests were run only three times per program, and the results vary between runs. The timing method uses clock(), which measures processor time rather than wall-clock time; very short operations, such as the single-pass function, are close to the timer's practical measurement limits. The report does not record the processor model, operating-system load, compiler version, optimization flags, or power consumption. In addition, the two counting functions produce different results because their loop logic differs, so their timings compare the implementations but do not demonstrate equivalent calculations.
+The tests were performed only three times, on one execution environment.
+Operating-system scheduling, background processes, processor state,
+compiler settings, and hardware can affect timings. The baseline results
+varied noticeably, and the naive algorithm's third run (1.102735 s) was
+slower than its first two runs. Very short measurements, such as
+0.000018 s, are also close to the practical resolution of simple timing
+and should be interpreted cautiously. Finally, the algorithm comparison
+has the correctness difference described above. In the instrumented
+program, total times were 0.000811 s, 0.001177 s, and 0.001068 s; each
+was greater than its individual phase times, as expected.
 Practical Engineering Takeaway
-The clearest result is that algorithm design strongly affects runtime. On the 50,000-element array, the nested-loop implementation repeatedly examines earlier elements, while the single-pass implementation visits each element once. The recorded times show that the single-pass version is substantially faster, although its result should be checked against the intended counting requirement before treating it as a correct replacement. The dataset test also shows why measuring separate stages is useful: across the three runs, BUILD_DATA took 0.000386–0.000653 seconds, PROCESS took 0.000277–0.000473 seconds, and REDUCE took 0.000127–0.000131 seconds. Engineers should first choose an algorithm that performs the required work correctly, then benchmark it under documented conditions. To evaluate green efficiency properly, execution-time tests should be complemented by direct energy measurements using suitable hardware or validated power-monitoring tools.
+The measurements show that algorithm structure can have a major impact
+on runtime. Visiting each element once is substantially faster than
+repeatedly scanning prefixes. Engineers should avoid unnecessary
+repeated work, measure multiple runs, and check that compared
+implementations produce the same result before drawing a performance
+conclusion. Runtime is useful for benchmarking and as an energy-related
+proxy, but direct energy measurement would be required to quantify
+actual energy consumption.
