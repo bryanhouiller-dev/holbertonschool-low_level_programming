@@ -7,7 +7,6 @@
  * @max: maximum value included
  *
  * Return: pointer to the newly created array, or NULL if fail
- *  this files are the best 
  */
 int *array_range(int min, int max)
 {
