@@ -23,7 +23,13 @@ int main(void)
 		if (choice == 0)
 		{
 			printf("Bye!\n");
-			break;
+		}
+		else if (choice >= 1 && choice <= 4)
+		{
+		}
+		else
+		{
+			printf("Invalid choice\n");
 		}
 	} while (choice != 0);
 
